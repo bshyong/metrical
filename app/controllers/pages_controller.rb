@@ -1,11 +1,29 @@
 class PagesController < ApplicationController
   def index
-    annotations = MIXPANEL_CLIENT.request(
+
+    options = {
+      retention_type: 'compounded',
+      from_date: '2015-6-1',
+      to_date: Time.now.strftime('%Y-%-m-%-d'),
+      event: 'Viewed page',
+      on: 'properties["signedIn"] == true'
+    }
+
+    daily_engagement = MIXPANEL_CLIENT.request(
       '/retention',
-      from_date: '2013-12-1',
-      to_date: '2015-6-1'
+      options.merge(unit: 'day')
     )
 
-    render json: annotations
+    weekly_engagement = MIXPANEL_CLIENT.request(
+      '/retention',
+      options.merge(unit: 'week')
+    )
+
+    monthly_engagement = MIXPANEL_CLIENT.request(
+      '/retention',
+      options.merge(unit: 'month')
+    )
+
+    render json: daily_engagement
   end
 end
